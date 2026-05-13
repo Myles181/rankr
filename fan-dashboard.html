@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mu$ic-fans — Fan Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black:#050507;--white:#f5f4f0;--gold:#c8a84b;--gold2:#e8c96a;
+    --green:#1db954;--muted:#7a7870;--card:#0e0d10;--border:#1e1c22;
+    --font-display:'Bebas Neue',sans-serif;
+    --font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--black);color:var(--white);font-family:var(--font-body);display:flex;min-height:100vh;}
+
+  .sidebar{width:220px;background:var(--card);border-right:.5px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;flex-shrink:0;}
+  .sb-logo{font-family:var(--font-display);font-size:1.6rem;color:var(--gold);margin-bottom:2rem;padding-left:.5rem;}
+  .sb-logo span{color:var(--white);}
+  .sb-nav{display:flex;flex-direction:column;gap:.25rem;}
+  .sb-link{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:6px;color:var(--muted);font-size:.875rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s;text-decoration:none;}
+  .sb-link:hover,.sb-link.active{background:rgba(29,185,84,.08);color:var(--white);}
+  .sb-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+  .sb-link.active .sb-dot{background:var(--green);}
+  .sb-footer{margin-top:auto;}
+  .sb-profile{display:flex;align-items:center;gap:.75rem;padding:.75rem;background:rgba(255,255,255,.03);border-radius:8px;border:.5px solid var(--border);}
+  .sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--black);}
+  .sb-name{font-size:.8rem;font-weight:500;}
+  .sb-role{font-size:.7rem;color:var(--muted);font-family:var(--font-mono);}
+  .premium-badge{font-size:.6rem;background:rgba(29,185,84,.15);color:var(--green);padding:.1rem .4rem;border-radius:2px;font-family:var(--font-mono);}
+
+  .main{flex:1;overflow-y:auto;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2rem;border-bottom:.5px solid var(--border);}
+  .topbar h1{font-family:var(--font-display);font-size:1.8rem;letter-spacing:.04em;}
+  .btn{padding:.6rem 1.25rem;border-radius:4px;font-family:var(--font-body);font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-green{background:var(--green);color:var(--black);}
+  .btn-green:hover{filter:brightness(1.1);}
+  .btn-outline{background:transparent;color:var(--white);border:.5px solid var(--border);}
+  .btn-outline:hover{border-color:var(--muted);}
+
+  .content{padding:2rem;}
+
+  /* MY RANK HERO */
+  .rank-hero{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;align-items:center;}
+  .rank-main{text-align:center;}
+  .rank-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.15em;font-family:var(--font-mono);margin-bottom:.5rem;}
+  .rank-num{font-family:var(--font-display);font-size:5rem;color:var(--gold);line-height:1;}
+  .rank-sub{font-size:.8rem;color:var(--muted);margin-top:.25rem;}
+  .rank-stat{text-align:center;}
+  .rank-stat-val{font-family:var(--font-display);font-size:2.2rem;color:var(--white);line-height:1;}
+  .rank-stat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-top:.25rem;}
+
+  /* ACTIVE POOLS */
+  .section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);font-family:var(--font-mono);margin-bottom:1rem;}
+  .pools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem;}
+  .pool-card{background:var(--card);border:.5px solid var(--border);border-radius:10px;padding:1.5rem;transition:border-color .2s;}
+  .pool-card:hover{border-color:var(--gold);}
+  .pool-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;}
+  .pool-artist{font-size:.75rem;color:var(--muted);font-family:var(--font-mono);margin-bottom:.25rem;}
+  .pool-title{font-size:1rem;font-weight:600;}
+  .pool-reward{font-family:var(--font-display);font-size:1.4rem;color:var(--gold);}
+  .pool-reward-label{font-size:.65rem;color:var(--muted);font-family:var(--font-mono);}
+  .pool-meta{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-top:1rem;padding-top:1rem;border-top:.5px solid var(--border);}
+  .live-dot{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--green);font-family:var(--font-mono);}
+  .live-dot::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;display:block;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .join-btn{width:100%;margin-top:1rem;}
+
+  /* LEADERBOARD */
+  .lb-card{background:var(--card);border:.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:2rem;}
+  .lb-header{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:.5px solid var(--border);}
+  .lb-title{font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-mono);}
+  .lb-row{display:grid;grid-template-columns:40px 1fr auto auto;align-items:center;gap:1rem;padding:.875rem 1.25rem;border-bottom:.5px solid var(--border);transition:background .15s;}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row:hover{background:rgba(255,255,255,.02);}
+  .lb-row.is-me{background:rgba(200,168,75,.05);border-left:2px solid var(--gold);}
+  .lb-rank{font-family:var(--font-display);font-size:1.3rem;color:var(--muted);text-align:center;}
+  .lb-row:nth-child(2) .lb-rank{color:var(--gold);}
+  .lb-row:nth-child(3) .lb-rank{color:#aaa;}
+  .lb-row:nth-child(4) .lb-rank{color:#cd7f32;}
+  .lb-name{font-size:.875rem;font-weight:500;}
+  .lb-you{font-size:.65rem;color:var(--gold);font-family:var(--font-mono);margin-left:.4rem;}
+  .lb-time{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);}
+  .lb-bar-wrap{width:80px;height:4px;background:var(--border);border-radius:2px;}
+  .lb-bar{height:100%;border-radius:2px;background:var(--gold);}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">Mu$ic-<span>fans</span></div>
+  <nav class="sb-nav">
+    <a class="sb-link active" href="#">
+      <span class="sb-dot"></span> Dashboard
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> Active Pools
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> My Rankings
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> Rewards
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-profile">
+      <div class="sb-avatar" id="avatarInitial">F</div>
+      <div>
+        <div class="sb-name" id="fanName">Loading...</div>
+        <div class="sb-role"><span class="premium-badge">✓ Premium</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <h1>Fan Dashboard</h1>
+    <button class="btn btn-green" onclick="syncAll()">⟳ Sync listening</button>
+  </div>
+
+  <div class="content">
+
+    <!-- MY RANK HERO -->
+    <div class="rank-hero">
+      <div class="rank-stat">
+        <div class="rank-stat-val" id="totalPools">0</div>
+        <div class="rank-stat-label">Pools joined</div>
+      </div>
+      <div class="rank-main">
+        <div class="rank-label">Your best rank</div>
+        <div class="rank-num" id="bestRank">—</div>
+        <div class="rank-sub" id="rankSub">Join a pool to start</div>
+      </div>
+      <div class="rank-stat">
+        <div class="rank-stat-val" id="totalTime">0h</div>
+        <div class="rank-stat-label">Total stream time</div>
+      </div>
+    </div>
+
+    <!-- ACTIVE POOLS TO JOIN -->
+    <div class="section-title">Active pools</div>
+    <div class="pools-grid" id="poolsGrid">
+      <div style="color:var(--muted);font-size:.875rem;padding:1rem 0;">Loading pools...</div>
+    </div>
+
+    <!-- LIVE LEADERBOARD -->
+    <div class="section-title">Live leaderboard — <span id="lbPoolName" style="color:var(--gold)">select a pool</span></div>
+    <div class="lb-card">
+      <div class="lb-header">
+        <span class="lb-title">Rankings</span>
+        <span class="live-dot">Live</span>
+      </div>
+      <div id="leaderboard">
+        <div style="padding:2rem;text-align:center;color:var(--muted);font-size:.875rem;">Join a pool to see rankings</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const API = 'http://localhost:4000';
+  let currentPoolId = null;
+
+  async function loadSession() {
+    try {
+      const res  = await fetch(`${API}/auth/me`, { credentials: 'include' });
+      const data = await res.json();
+      if (data.error) { window.location = '/'; return; }
+      document.getElementById('fanName').textContent      = data.displayName;
+      document.getElementById('avatarInitial').textContent = data.displayName?.[0]?.toUpperCase() || 'F';
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadPools() {
+    try {
+      const res   = await fetch(`${API}/pools`, { credentials: 'include' });
+      const pools = await res.json();
+      document.getElementById('totalPools').textContent = pools.length;
+
+      if (!pools.length) {
+        document.getElementById('poolsGrid').innerHTML =
+          '<div style="color:var(--muted);font-size:.875rem;">No active pools right now.</div>';
+        return;
+      }
+
+      document.getElementById('poolsGrid').innerHTML = pools.map(pool => {
+        const ends     = new Date(pool.endsAt);
+        const daysLeft = Math.ceil((ends - new Date()) / (1000 * 60 * 60 * 24));
+        return `
+          <div class="pool-card">
+            <div class="pool-card-header">
+              <div>
+                <div class="pool-artist">${pool.artistName} ${pool.artistVerified ? '✓' : ''}</div>
+                <div class="pool-title">${pool.title}</div>
+              </div>
+              <span class="live-dot">Live</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div>
+                <div class="pool-reward">${pool.totalReward} ${pool.currency}</div>
+                <div class="pool-reward-label">Total reward pool</div>
+              </div>
+              <div style="text-align:right;font-size:.75rem;color:var(--muted)">
+                Top ${pool.topN} win<br/>${daysLeft}d left
+              </div>
+            </div>
+            <div class="pool-meta">
+              <span>${pool.participants} participants</span>
+              <span>${pool.rewardType}</span>
+            </div>
+            <button class="btn btn-green join-btn" onclick="joinPool(${pool.id}, '${pool.title}')">
+              Join & view leaderboard
+            </button>
+          </div>`;
+      }).join('');
+    } catch (e) { console.error(e); }
+  }
+
+  async function joinPool(poolId, poolName) {
+    try {
+      await fetch(`${API}/pools/${poolId}/join`, { method: 'POST', credentials: 'include' });
+      currentPoolId = poolId;
+      document.getElementById('lbPoolName').textContent = poolName;
+      loadLeaderboard(poolId);
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadLeaderboard(poolId) {
+    try {
+      const res    = await fetch(`${API}/leaderboard/${poolId}`, { credentials: 'include' });
+      const ranked = await res.json();
+
+      if (!ranked.length) {
+        document.getElementById('leaderboard').innerHTML =
+          '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.875rem;">No rankings yet — start streaming!</div>';
+        return;
+      }
+
+      const meRes  = await fetch(`${API}/leaderboard/${poolId}/me`, { credentials: 'include' });
+      const me     = await meRes.json();
+      const maxScore = ranked[0]?.score || 1;
+
+      document.getElementById('bestRank').textContent = me.rank ? `#${me.rank}` : '—';
+      document.getElementById('rankSub').textContent  = me.rank ? `out of ${me.totalFans} fans` : 'Start streaming to rank';
+      document.getElementById('totalTime').textContent = me.formatted || '0m';
+
+      document.getElementById('leaderboard').innerHTML = ranked.slice(0, 10).map((fan, i) => {
+        const isMe   = fan.rank === me.rank;
+        const barPct = Math.round((fan.score / maxScore) * 100);
+        const hrs    = Math.floor(fan.score / 3600);
+        const mins   = Math.floor((fan.score % 3600) / 60);
+        const time   = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+
+        return `
+          <div class="lb-row ${isMe ? 'is-me' : ''}">
+            <div class="lb-rank">${fan.rank}</div>
+            <div class="lb-name">
+              ${fan.displayName}
+              ${isMe ? '<span class="lb-you">YOU</span>' : ''}
+            </div>
+            <div class="lb-time">${time}</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width:${barPct}%"></div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (e) { console.error(e); }
+  }
+
+  async function syncAll() {
+    if (!currentPoolId) return alert('Join a pool first to sync listening time.');
+    try {
+      const res  = await fetch(`${API}/leaderboard/${currentPoolId}/sync`, {
+        method:      'POST',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify({ artistId: 'spotify_artist_id_here' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadLeaderboard(currentPoolId);
+        loadPools();
+      }
+    } catch (e) { alert('Sync failed. Is the backend running?'); }
+  }
+
+  // Auto-refresh leaderboard every 30 seconds
+  setInterval(() => {
+    if (currentPoolId) loadLeaderboard(currentPoolId);
+  }, 30000);
+
+  loadSession();
+  loadPools();
+</script>
+</body>
+</html>

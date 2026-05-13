@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mu$ic-fans — Artist Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black:#050507;--white:#f5f4f0;--gold:#c8a84b;--gold2:#e8c96a;
+    --green:#1db954;--muted:#7a7870;--card:#0e0d10;--border:#1e1c22;
+    --font-display:'Bebas Neue',sans-serif;
+    --font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--black);color:var(--white);font-family:var(--font-body);display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{width:220px;background:var(--card);border-right:.5px solid var(--border);display:flex;flex-direction:column;padding:1.5rem 1rem;flex-shrink:0;}
+  .sb-logo{font-family:var(--font-display);font-size:1.6rem;color:var(--gold);margin-bottom:2rem;padding-left:.5rem;}
+  .sb-logo span{color:var(--white);}
+  .sb-nav{display:flex;flex-direction:column;gap:.25rem;}
+  .sb-link{display:flex;align-items:center;gap:.75rem;padding:.65rem .75rem;border-radius:6px;color:var(--muted);font-size:.875rem;font-weight:500;cursor:pointer;transition:background .15s,color .15s;text-decoration:none;}
+  .sb-link:hover,.sb-link.active{background:rgba(200,168,75,.08);color:var(--white);}
+  .sb-link.active .sb-dot{background:var(--gold);}
+  .sb-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+  .sb-footer{margin-top:auto;}
+  .sb-profile{display:flex;align-items:center;gap:.75rem;padding:.75rem;background:rgba(255,255,255,.03);border-radius:8px;border:.5px solid var(--border);}
+  .sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--black);}
+  .sb-name{font-size:.8rem;font-weight:500;}
+  .sb-role{font-size:.7rem;color:var(--muted);font-family:var(--font-mono);}
+  .verified-badge{font-size:.6rem;background:rgba(29,185,84,.15);color:var(--green);padding:.1rem .4rem;border-radius:2px;font-family:var(--font-mono);}
+
+  /* MAIN */
+  .main{flex:1;overflow-y:auto;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 2rem;border-bottom:.5px solid var(--border);}
+  .topbar h1{font-family:var(--font-display);font-size:1.8rem;letter-spacing:.04em;}
+  .btn{padding:.6rem 1.25rem;border-radius:4px;font-family:var(--font-body);font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+  .btn-gold{background:var(--gold);color:var(--black);}
+  .btn-gold:hover{background:var(--gold2);}
+  .btn-outline{background:transparent;color:var(--white);border:.5px solid var(--border);}
+  .btn-outline:hover{border-color:var(--muted);}
+
+  /* CONTENT */
+  .content{padding:2rem;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .stat-card{background:var(--card);border:.5px solid var(--border);border-radius:8px;padding:1.25rem;}
+  .stat-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-family:var(--font-mono);margin-bottom:.5rem;}
+  .stat-val{font-family:var(--font-display);font-size:2rem;color:var(--gold);line-height:1;}
+  .stat-sub{font-size:.75rem;color:var(--muted);margin-top:.25rem;}
+
+  /* POOLS TABLE */
+  .section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.15em;color:var(--muted);font-family:var(--font-mono);margin-bottom:1rem;}
+  .pool-table{background:var(--card);border:.5px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:2rem;}
+  .pool-row{display:grid;grid-template-columns:1fr 100px 100px 100px 120px;align-items:center;gap:1rem;padding:1rem 1.25rem;border-bottom:.5px solid var(--border);}
+  .pool-row:last-child{border-bottom:none;}
+  .pool-row.header{background:rgba(255,255,255,.02);}
+  .pool-row.header span{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);}
+  .pool-name{font-size:.9rem;font-weight:500;}
+  .pool-meta{font-size:.75rem;color:var(--muted);margin-top:.2rem;}
+  .pool-val{font-size:.875rem;text-align:right;font-family:var(--font-mono);}
+  .status-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-family:var(--font-mono);padding:.2rem .6rem;border-radius:2px;}
+  .status-active{background:rgba(29,185,84,.1);color:var(--green);}
+  .status-active::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+  .status-closed{background:rgba(255,255,255,.05);color:var(--muted);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* CREATE POOL MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--card);border:.5px solid var(--border);border-radius:12px;padding:2rem;width:520px;max-height:90vh;overflow-y:auto;}
+  .modal h2{font-family:var(--font-display);font-size:1.8rem;margin-bottom:1.5rem;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .form-field{display:flex;flex-direction:column;gap:.4rem;}
+  .form-field.full{grid-column:1/-1;}
+  label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);}
+  input,select,textarea{background:var(--black);border:.5px solid var(--border);border-radius:4px;padding:.65rem .875rem;color:var(--white);font-family:var(--font-body);font-size:.875rem;width:100%;transition:border-color .15s;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
+  select option{background:var(--black);}
+  textarea{resize:vertical;min-height:80px;}
+  .modal-btns{display:flex;gap:.75rem;margin-top:1.5rem;justify-content:flex-end;}
+
+  /* ARTIST VERIFICATION BANNER */
+  .verify-banner{background:rgba(200,168,75,.08);border:.5px solid rgba(200,168,75,.2);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
+  .verify-banner p{font-size:.85rem;color:var(--gold);}
+  .verify-banner strong{display:block;margin-bottom:.2rem;}
+  .verify-icon{font-size:1.5rem;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">Mu$ic-<span>fans</span></div>
+  <nav class="sb-nav">
+    <a class="sb-link active" href="#">
+      <span class="sb-dot"></span> Dashboard
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> My Pools
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> Leaderboard
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> Analytics
+    </a>
+    <a class="sb-link" href="#">
+      <span class="sb-dot"></span> Settings
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-profile">
+      <div class="sb-avatar" id="avatarInitial">A</div>
+      <div>
+        <div class="sb-name" id="artistName">Loading...</div>
+        <div class="sb-role">Artist <span class="verified-badge" id="verifiedBadge" style="display:none">✓ Verified</span></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <h1>Artist Dashboard</h1>
+    <button class="btn btn-gold" onclick="openModal()">+ Create Pool</button>
+  </div>
+
+  <div class="content">
+
+    <!-- Verification banner (shown if not verified) -->
+    <div class="verify-banner" id="verifyBanner" style="display:none">
+      <div class="verify-icon">⚠️</div>
+      <div>
+        <strong>Verify your Spotify artist profile</strong>
+        <p>Connect your official Spotify artist account so fans can trust your pools are legitimate.</p>
+      </div>
+      <button class="btn btn-outline" onclick="connectSpotify()">Connect Spotify</button>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Active pools</div>
+        <div class="stat-val" id="statActive">0</div>
+        <div class="stat-sub">Running now</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total fans</div>
+        <div class="stat-val" id="statFans">0</div>
+        <div class="stat-sub">Across all pools</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Rewards given</div>
+        <div class="stat-val" id="statRewards">0</div>
+        <div class="stat-sub">SOL distributed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total streams</div>
+        <div class="stat-val" id="statStreams">0</div>
+        <div class="stat-sub">Verified plays</div>
+      </div>
+    </div>
+
+    <!-- ACTIVE POOLS -->
+    <div class="section-title">Active pools</div>
+    <div class="pool-table">
+      <div class="pool-row header">
+        <span>Pool name</span>
+        <span style="text-align:right">Reward</span>
+        <span style="text-align:right">Fans</span>
+        <span style="text-align:right">Ends</span>
+        <span style="text-align:right">Status</span>
+      </div>
+      <div id="poolList">
+        <div style="padding:2rem;text-align:center;color:var(--muted);font-size:.875rem;">
+          No pools yet — create your first one above
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- CREATE POOL MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2>Create Reward Pool</h2>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Pool title</label>
+        <input type="text" id="poolTitle" placeholder="e.g. Summer Drop Reward Campaign"/>
+      </div>
+      <div class="form-field full">
+        <label>Description</label>
+        <textarea id="poolDesc" placeholder="Tell fans what this pool is about..."></textarea>
+      </div>
+      <div class="form-field">
+        <label>Reward type</label>
+        <select id="rewardType">
+          <option value="token">Crypto token (SOL/USDC)</option>
+          <option value="nft">NFT</option>
+          <option value="merch">Merch</option>
+          <option value="exclusive_content">Exclusive content</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Total reward (SOL)</label>
+        <input type="number" id="totalReward" placeholder="e.g. 1.5" step="0.01" min="0"/>
+      </div>
+      <div class="form-field">
+        <label>Duration (days)</label>
+        <input type="number" id="duration" placeholder="e.g. 30" min="1" max="365"/>
+      </div>
+      <div class="form-field">
+        <label>Number of winners</label>
+        <input type="number" id="topN" placeholder="e.g. 10" min="1"/>
+      </div>
+      <div class="form-field full">
+        <label>Your Solana wallet address</label>
+        <input type="text" id="walletAddr" placeholder="Your SOL wallet (funds come from here)"/>
+      </div>
+      <div class="form-field full">
+        <label>Reward description</label>
+        <input type="text" id="rewardDesc" placeholder="e.g. Top 3 each get 0.5 SOL, places 4-10 get 0.1 SOL"/>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="createPool()">Deploy Pool</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:4000';
+
+  // Load session
+  async function loadSession() {
+    try {
+      const res  = await fetch(`${API}/auth/me`, { credentials: 'include' });
+      const data = await res.json();
+      if (data.error) { window.location = '/'; return; }
+
+      document.getElementById('artistName').textContent    = data.displayName;
+      document.getElementById('avatarInitial').textContent = data.displayName?.[0]?.toUpperCase() || 'A';
+
+      if (data.artistVerified) {
+        document.getElementById('verifiedBadge').style.display = 'inline';
+      } else {
+        document.getElementById('verifyBanner').style.display  = 'flex';
+      }
+    } catch (e) {
+      console.error('Session load failed:', e);
+    }
+  }
+
+  // Load pools
+  async function loadPools() {
+    try {
+      const res   = await fetch(`${API}/pools`, { credentials: 'include' });
+      const pools = await res.json();
+
+      let active = 0, totalFans = 0;
+      let html = '';
+
+      pools.forEach(pool => {
+        const ends   = new Date(pool.endsAt);
+        const daysLeft = Math.ceil((ends - new Date()) / (1000 * 60 * 60 * 24));
+        active++;
+        totalFans += pool.participants;
+
+        html += `
+          <div class="pool-row">
+            <div>
+              <div class="pool-name">${pool.title}</div>
+              <div class="pool-meta">Top ${pool.topN} winners</div>
+            </div>
+            <div class="pool-val">${pool.totalReward} ${pool.currency}</div>
+            <div class="pool-val">${pool.participants}</div>
+            <div class="pool-val">${daysLeft}d</div>
+            <div style="text-align:right">
+              <span class="status-badge status-active">Live</span>
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statFans').textContent   = totalFans;
+      document.getElementById('poolList').innerHTML     = html || '<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.875rem;">No pools yet</div>';
+    } catch (e) {
+      console.error('Pool load failed:', e);
+    }
+  }
+
+  // Create pool
+  async function createPool() {
+    const body = {
+      title:             document.getElementById('poolTitle').value,
+      description:       document.getElementById('poolDesc').value,
+      rewardType:        document.getElementById('rewardType').value,
+      totalReward:       document.getElementById('totalReward').value,
+      durationDays:      document.getElementById('duration').value,
+      topN:              document.getElementById('topN').value,
+      walletAddress:     document.getElementById('walletAddr').value,
+      rewardDescription: document.getElementById('rewardDesc').value,
+      currency:          'SOL',
+    };
+
+    try {
+      const res  = await fetch(`${API}/pools`, {
+        method:      'POST',
+        headers:     { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body:        JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (data.error) return alert(data.error);
+      closeModal();
+      loadPools();
+      alert(`Pool "${data.title}" created successfully!`);
+    } catch (e) {
+      alert('Failed to create pool. Is the backend running?');
+    }
+  }
+
+  function connectSpotify() {
+    window.location = `${API}/auth/spotify/artist`;
+  }
+
+  function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  loadSession();
+  loadPools();
+</script>
+</body>
+</html>

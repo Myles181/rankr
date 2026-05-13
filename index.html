@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mu$ic-fans — Stream. Rank. Earn.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --black: #050507;
+        --white: #f5f4f0;
+        --cream: #ede9e0;
+        --gold: #c8a84b;
+        --gold2: #e8c96a;
+        --green: #1db954;
+        --muted: #7a7870;
+        --card: #0e0d10;
+        --border: #1e1c22;
+        --font-display: "Bebas Neue", sans-serif;
+        --font-body: "DM Sans", sans-serif;
+        --font-mono: "DM Mono", monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: var(--black);
+        color: var(--white);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* ── NOISE TEXTURE OVERLAY ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 999;
+        opacity: 0.4;
+      }
+
+      /* ── NAV ── */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 3rem;
+        border-bottom: 0.5px solid transparent;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+      nav.scrolled {
+        background: rgba(5, 5, 7, 0.92);
+        backdrop-filter: blur(12px);
+        border-color: var(--border);
+      }
+      .logo {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        letter-spacing: 0.08em;
+        color: var(--gold);
+      }
+      .logo span {
+        color: var(--white);
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--white);
+      }
+      .btn-nav {
+        background: var(--gold);
+        color: var(--black);
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 4px;
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-nav:hover {
+        background: var(--gold2);
+      }
+
+      /* ── HERO ── */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 8rem 3rem 4rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 60% 50% at 70% 50%,
+            rgba(200, 168, 75, 0.08) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 40% 60% at 10% 80%,
+            rgba(29, 185, 84, 0.05) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+      }
+      .hero-eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.2em;
+        color: var(--gold);
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: fadeUp 0.6s 0.2s forwards;
+      }
+      .hero h1 {
+        font-family: var(--font-display);
+        font-size: clamp(4.5rem, 12vw, 10rem);
+        line-height: 0.92;
+        letter-spacing: 0.02em;
+        max-width: 900px;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.35s forwards;
+      }
+      .hero h1 em {
+        font-style: normal;
+        color: var(--gold);
+        position: relative;
+        display: inline-block;
+      }
+      .hero-sub {
+        max-width: 520px;
+        font-size: 1.1rem;
+        color: var(--muted);
+        margin-top: 2rem;
+        line-height: 1.7;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.5s forwards;
+      }
+      .hero-ctas {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        flex-wrap: wrap;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.65s forwards;
+      }
+      .btn-primary {
+        background: var(--gold);
+        color: var(--black);
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 4px;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        transition:
+          background 0.2s,
+          transform 0.15s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-primary:hover {
+        background: var(--gold2);
+        transform: translateY(-1px);
+      }
+      .btn-outline {
+        background: transparent;
+        color: var(--white);
+        border: 0.5px solid var(--border);
+        padding: 0.875rem 2rem;
+        border-radius: 4px;
+        font-family: var(--font-body);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          transform 0.15s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-outline:hover {
+        border-color: var(--muted);
+        transform: translateY(-1px);
+      }
+
+      /* live ticker */
+      .hero-ticker {
+        margin-top: 4rem;
+        display: flex;
+        gap: 3rem;
+        opacity: 0;
+        animation: fadeUp 0.7s 0.8s forwards;
+      }
+      .ticker-item {
+      }
+      .ticker-val {
+        font-family: var(--font-display);
+        font-size: 2.4rem;
+        color: var(--gold);
+        letter-spacing: 0.04em;
+        line-height: 1;
+      }
+      .ticker-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-family: var(--font-mono);
+        margin-top: 0.25rem;
+      }
+
+      /* ── MARQUEE ── */
+      .marquee-wrap {
+        overflow: hidden;
+        border-top: 0.5px solid var(--border);
+        border-bottom: 0.5px solid var(--border);
+        padding: 1rem 0;
+        background: var(--card);
+      }
+      .marquee-track {
+        display: flex;
+        gap: 3rem;
+        white-space: nowrap;
+        animation: marquee 24s linear infinite;
+        width: max-content;
+      }
+      .marquee-item {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .marquee-item span {
+        color: var(--gold);
+        font-size: 0.6rem;
+      }
+      @keyframes marquee {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* ── SECTIONS ── */
+      section {
+        padding: 6rem 3rem;
+      }
+      .section-label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.22em;
+        color: var(--gold);
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+      h2 {
+        font-family: var(--font-display);
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        line-height: 1.05;
+        letter-spacing: 0.03em;
+        max-width: 700px;
+      }
+      h2 em {
+        font-style: normal;
+        color: var(--gold);
+      }
+
+      /* ── HOW IT WORKS ── */
+      .how {
+        border-top: 0.5px solid var(--border);
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 2px;
+        margin-top: 3.5rem;
+        border: 0.5px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .step {
+        background: var(--card);
+        padding: 2.5rem 2rem;
+        position: relative;
+        transition: background 0.2s;
+      }
+      .step:hover {
+        background: #131218;
+      }
+      .step-num {
+        font-family: var(--font-display);
+        font-size: 4rem;
+        color: var(--border);
+        line-height: 1;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s;
+      }
+      .step:hover .step-num {
+        color: var(--gold);
+      }
+      .step h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.02em;
+      }
+      .step p {
+        font-size: 0.875rem;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      /* ── FOR ARTISTS / FANS — 2 col ── */
+      .for-both {
+        border-top: 0.5px solid var(--border);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+      .for-col {
+        padding: 5rem 3rem;
+      }
+      .for-col:first-child {
+        border-right: 0.5px solid var(--border);
+      }
+      .for-col .tag {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding: 0.3rem 0.75rem;
+        border-radius: 2px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+      }
+      .for-col.artist .tag {
+        background: rgba(200, 168, 75, 0.12);
+        color: var(--gold);
+      }
+      .for-col.fan .tag {
+        background: rgba(29, 185, 84, 0.12);
+        color: var(--green);
+      }
+      .for-col h2 {
+        font-size: clamp(2rem, 3.5vw, 3rem);
+        margin-bottom: 1.25rem;
+      }
+      .for-col p {
+        color: var(--muted);
+        max-width: 400px;
+        margin-bottom: 2rem;
+        line-height: 1.75;
+      }
+      .benefit-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .benefit-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: var(--white);
+      }
+      .benefit-list li::before {
+        content: "→";
+        color: var(--gold);
+        font-family: var(--font-mono);
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+      }
+      .for-col.fan .benefit-list li::before {
+        color: var(--green);
+      }
+
+      /* ── LEADERBOARD PREVIEW ── */
+      .lb-section {
+        border-top: 0.5px solid var(--border);
+        background: var(--card);
+      }
+      .lb-wrap {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 4rem;
+        align-items: center;
+        margin-top: 3rem;
+      }
+      .lb-card {
+        background: var(--black);
+        border: 0.5px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .lb-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 0.5px solid var(--border);
+      }
+      .lb-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-family: var(--font-mono);
+      }
+      .lb-live {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.7rem;
+        color: var(--green);
+        font-family: var(--font-mono);
+      }
+      .lb-live::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 1.5s infinite;
+        display: block;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .lb-row {
+        display: grid;
+        grid-template-columns: 32px 1fr auto auto;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.9rem 1.25rem;
+        border-bottom: 0.5px solid var(--border);
+        transition: background 0.15s;
+      }
+      .lb-row:last-child {
+        border-bottom: none;
+      }
+      .lb-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .lb-rank {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        color: var(--muted);
+      }
+      .lb-row.gold-row .lb-rank {
+        color: var(--gold);
+      }
+      .lb-row.silver-row .lb-rank {
+        color: #aaa;
+      }
+      .lb-row.bronze-row .lb-rank {
+        color: #cd7f32;
+      }
+      .lb-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+      .lb-time {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .lb-bar-wrap {
+        width: 60px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+      }
+      .lb-bar {
+        height: 100%;
+        border-radius: 2px;
+        background: var(--gold);
+      }
+      .lb-row.silver-row .lb-bar {
+        background: #aaa;
+      }
+      .lb-row.bronze-row .lb-bar {
+        background: #cd7f32;
+      }
+      .lb-row:nth-child(n + 5) .lb-bar {
+        background: var(--muted);
+      }
+      .lb-text h3 {
+        font-family: var(--font-display);
+        font-size: 2.2rem;
+        margin-bottom: 1rem;
+        line-height: 1.1;
+      }
+      .lb-text p {
+        color: var(--muted);
+        line-height: 1.75;
+        font-size: 0.95rem;
+      }
+
+      /* ── PROTOCOL ── */
+      .protocol {
+        border-top: 0.5px solid var(--border);
+      }
+      .protocol-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 3rem;
+      }
+      .protocol-card {
+        background: var(--card);
+        border: 0.5px solid var(--border);
+        border-radius: 8px;
+        padding: 2rem;
+        transition: border-color 0.2s;
+      }
+      .protocol-card:hover {
+        border-color: var(--gold);
+      }
+      .protocol-icon {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
+      }
+      .protocol-card h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      .protocol-card p {
+        font-size: 0.85rem;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      /* ── CTA BANNER ── */
+      .cta-banner {
+        border-top: 0.5px solid var(--border);
+        text-align: center;
+        background: linear-gradient(
+          135deg,
+          rgba(200, 168, 75, 0.06) 0%,
+          transparent 60%
+        );
+      }
+      .cta-banner h2 {
+        margin: 0 auto 1.5rem;
+        text-align: center;
+      }
+      .cta-banner p {
+        color: var(--muted);
+        max-width: 480px;
+        margin: 0 auto 2.5rem;
+      }
+      .cta-btns {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        border-top: 0.5px solid var(--border);
+        padding: 2.5rem 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .footer-logo {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        color: var(--gold);
+        letter-spacing: 0.08em;
+      }
+      .footer-links {
+        display: flex;
+        gap: 1.5rem;
+      }
+      .footer-links a {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .footer-links a:hover {
+        color: var(--white);
+      }
+      .footer-copy {
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
+      }
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 768px) {
+        nav {
+          padding: 1rem 1.5rem;
+        }
+        .nav-links {
+          display: none;
+        }
+        section {
+          padding: 4rem 1.5rem;
+        }
+        .hero {
+          padding: 7rem 1.5rem 3rem;
+        }
+        .for-both {
+          grid-template-columns: 1fr;
+        }
+        .for-col:first-child {
+          border-right: none;
+          border-bottom: 0.5px solid var(--border);
+        }
+        .lb-wrap {
+          grid-template-columns: 1fr;
+        }
+        .protocol-grid {
+          grid-template-columns: 1fr;
+        }
+        footer {
+          flex-direction: column;
+          text-align: center;
+        }
+        .hero-ticker {
+          gap: 2rem;
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAV -->
+    <nav id="nav">
+      <div class="logo">Mu$ic-<span>fans</span></div>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#artists">For artists</a>
+        <a href="#protocol">Protocol</a>
+        <button class="btn-nav">Launch app</button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-eyebrow">Built on Solana · Verified by Spotify</div>
+      <h1>Stream.<br /><em>Rank.</em><br />Earn.</h1>
+      <p class="hero-sub">
+        The first permissionless rewards protocol where artists give back to
+        their most loyal fans — powered by verified listening time, settled
+        on-chain.
+      </p>
+      <div class="hero-ctas">
+        <a href="#" class="btn-primary">Start a reward pool</a>
+        <a href="#how" class="btn-outline">See how it works</a>
+      </div>
+      <div class="hero-ticker">
+        <div class="ticker-item">
+          <div class="ticker-val" id="t1">$0</div>
+          <div class="ticker-label">Rewards distributed</div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-val" id="t2">0</div>
+          <div class="ticker-label">Active pools</div>
+        </div>
+        <div class="ticker-item">
+          <div class="ticker-val" id="t3">0</div>
+          <div class="ticker-label">Verified fans</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee-wrap">
+      <div class="marquee-track" id="marquee">
+        <div class="marquee-item">STREAM TO EARN <span>✦</span></div>
+        <div class="marquee-item">POWERED BY SOLANA <span>✦</span></div>
+        <div class="marquee-item">SPOTIFY PREMIUM VERIFIED <span>✦</span></div>
+        <div class="marquee-item">PERMISSIONLESS REWARDS <span>✦</span></div>
+        <div class="marquee-item">ON-CHAIN TRANSPARENCY <span>✦</span></div>
+        <div class="marquee-item">NO MIDDLEMEN <span>✦</span></div>
+        <div class="marquee-item">ARTIST TO FAN DIRECT <span>✦</span></div>
+        <div class="marquee-item">STREAM TO EARN <span>✦</span></div>
+        <div class="marquee-item">POWERED BY SOLANA <span>✦</span></div>
+        <div class="marquee-item">SPOTIFY PREMIUM VERIFIED <span>✦</span></div>
+        <div class="marquee-item">PERMISSIONLESS REWARDS <span>✦</span></div>
+        <div class="marquee-item">ON-CHAIN TRANSPARENCY <span>✦</span></div>
+        <div class="marquee-item">NO MIDDLEMEN <span>✦</span></div>
+        <div class="marquee-item">ARTIST TO FAN DIRECT <span>✦</span></div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="how">
+      <div class="section-label">Protocol</div>
+      <h2>How <em>Mu$ic-fans</em> works</h2>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <h3>Artist creates pool</h3>
+          <p>
+            Connect your wallet, fund a reward pool, set the duration and prize
+            tiers. No intermediaries — funds go straight on-chain.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">02</div>
+          <h3>Fans connect & join</h3>
+          <p>
+            Fans authenticate with Spotify Premium via OAuth, connect their
+            wallet, and agree to the public participation rules.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">03</div>
+          <h3>Stream & climb</h3>
+          <p>
+            Every verified stream counts. The more you listen, the higher you
+            rank on the live public leaderboard. Updated in real time.
+          </p>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">04</div>
+          <h3>Smart contract pays out</h3>
+          <p>
+            When the pool ends, the smart contract automatically distributes
+            rewards to top-ranked wallets. No human touches the funds.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOR ARTISTS + FANS -->
+    <div class="for-both" id="artists">
+      <div class="for-col artist reveal">
+        <span class="tag">For artists</span>
+        <h2>Reward your<br /><em>real</em> fans</h2>
+        <p>
+          Create a reward pool in minutes. Set your own prizes, duration, and
+          tiers. Mu$ic-fans handles the rest — verification, rankings, and
+          automatic distribution.
+        </p>
+        <ul class="benefit-list">
+          <li>Fund and deploy your pool from any Solana wallet</li>
+          <li>Set weekly, monthly, or custom durations</li>
+          <li>Choose your reward — tokens, NFTs, merch, or exclusive access</li>
+          <li>Live dashboard showing fan activity and top streamers</li>
+          <li>
+            Smart contract distributes automatically — you do nothing at end
+          </li>
+        </ul>
+      </div>
+      <div class="for-col fan reveal">
+        <span class="tag">For fans</span>
+        <h2>Listen more,<br /><em>earn</em> more</h2>
+        <p>
+          Connect your Spotify Premium account, join active pools from your
+          favourite artists, and start competing. Your listening time is your
+          currency.
+        </p>
+        <ul class="benefit-list">
+          <li>Spotify Premium required — keeps rankings fair and bot-free</li>
+          <li>Every 30+ second stream counts toward your score</li>
+          <li>Watch your rank climb on the live leaderboard</li>
+          <li>Rewards land in your wallet automatically when the pool ends</li>
+          <li>Join multiple artist pools simultaneously</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD PREVIEW -->
+    <section class="lb-section">
+      <div class="section-label">Live rankings</div>
+      <div class="lb-wrap">
+        <div class="lb-card reveal">
+          <div class="lb-header">
+            <span class="lb-title">Top streamers</span>
+            <span class="lb-live">Live</span>
+          </div>
+          <div class="lb-row gold-row">
+            <div class="lb-rank">1</div>
+            <div class="lb-name">@phantom_wav</div>
+            <div class="lb-time">48h 22m</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="lb-row silver-row">
+            <div class="lb-rank">2</div>
+            <div class="lb-name">@soulstream</div>
+            <div class="lb-time">41h 09m</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width: 85%"></div>
+            </div>
+          </div>
+          <div class="lb-row bronze-row">
+            <div class="lb-rank">3</div>
+            <div class="lb-name">@realnightfm</div>
+            <div class="lb-time">38h 54m</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width: 79%"></div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">4</div>
+            <div class="lb-name">@deepcuts_only</div>
+            <div class="lb-time">31h 17m</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width: 63%"></div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">5</div>
+            <div class="lb-name">@loophead_99</div>
+            <div class="lb-time">28h 02m</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width: 56%"></div>
+            </div>
+          </div>
+          <div class="lb-row">
+            <div class="lb-rank">6</div>
+            <div class="lb-name">@velvet_ears</div>
+            <div class="lb-time">22h 48m</div>
+            <div class="lb-bar-wrap">
+              <div class="lb-bar" style="width: 46%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="lb-text reveal">
+          <h3>The leaderboard<br />is the <em>game</em></h3>
+          <p>
+            Every stream moves you up. Every hour of listening is an entry. The
+            leaderboard is public, live, and identical for everyone — no
+            exceptions, no manipulation.
+          </p>
+          <br />
+          <p style="color: var(--muted); font-size: 0.875rem">
+            Powered by Spotify Premium OAuth. Minimum 30 seconds per track. Bot
+            detection always on.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROTOCOL -->
+    <section class="protocol" id="protocol">
+      <div class="section-label">Why trust it</div>
+      <h2>Permissionless.<br /><em>Transparent.</em> On-chain.</h2>
+      <div class="protocol-grid">
+        <div class="protocol-card reveal">
+          <div class="protocol-icon">🔒</div>
+          <h3>Funds never touch us</h3>
+          <p>
+            Artist funds go directly into a Solana smart contract. Mu$ic-fans
+            has zero custody over any assets at any point in the process.
+          </p>
+        </div>
+        <div class="protocol-card reveal">
+          <div class="protocol-icon">📋</div>
+          <h3>Rules set in stone</h3>
+          <p>
+            Once a pool is live, no one — not the artist, not Mu$ic-fans — can
+            change the rules. The smart contract enforces everything
+            automatically.
+          </p>
+        </div>
+        <div class="protocol-card reveal">
+          <div class="protocol-icon">✅</div>
+          <h3>Spotify Premium gate</h3>
+          <p>
+            Only verified Spotify Premium users can participate. Paid accounts
+            mean real identities — making Sybil attacks economically
+            impractical.
+          </p>
+        </div>
+        <div class="protocol-card reveal">
+          <div class="protocol-icon">⚡</div>
+          <h3>Solana speed</h3>
+          <p>
+            Sub-second confirmation times and near-zero transaction fees. Reward
+            distribution costs fractions of a cent regardless of pool size.
+          </p>
+        </div>
+        <div class="protocol-card reveal">
+          <div class="protocol-icon">🤖</div>
+          <h3>Bot detection</h3>
+          <p>
+            Abnormal streaming spikes are automatically flagged. Minimum
+            30-second rule per track. One verified account per wallet.
+          </p>
+        </div>
+        <div class="protocol-card reveal">
+          <div class="protocol-icon">🔍</div>
+          <h3>Fully auditable</h3>
+          <p>
+            All scores are submitted on-chain before distribution. Every fan can
+            verify their own score. Every payout is a public transaction.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="cta-banner">
+      <div class="section-label">Get started</div>
+      <h2>Ready to reward<br />your <em>top fans?</em></h2>
+      <p>
+        Create your first reward pool in under 5 minutes. Connect your wallet
+        and go live today.
+      </p>
+      <div class="cta-btns">
+        <a href="#" class="btn-primary">Launch as artist</a>
+        <a href="#" class="btn-outline">Join as fan</a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-logo">Mu$ic-fans</div>
+      <div class="footer-links">
+        <a href="#">Docs</a>
+        <a href="#">Protocol rules</a>
+        <a href="#">Terms</a>
+        <a href="#">Twitter</a>
+      </div>
+      <div class="footer-copy">Mu$ic-fans © 2026</div>
+    </footer>
+
+    <script>
+      // Nav scroll effect
+      const nav = document.getElementById("nav");
+      window.addEventListener("scroll", () => {
+        nav.classList.toggle("scrolled", window.scrollY > 40);
+      });
+
+      // Reveal on scroll
+      const reveals = document.querySelectorAll(".reveal");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+              setTimeout(() => e.target.classList.add("visible"), i * 80);
+              observer.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+      reveals.forEach((r) => observer.observe(r));
+
+      // Animated counters
+      function animateCount(
+        el,
+        target,
+        prefix = "",
+        suffix = "",
+        duration = 1800,
+      ) {
+        let start = 0;
+        const step = target / (duration / 16);
+        const timer = setInterval(() => {
+          start += step;
+          if (start >= target) {
+            start = target;
+            clearInterval(timer);
+          }
+          el.textContent = prefix + Math.floor(start).toLocaleString() + suffix;
+        }, 16);
+      }
+
+      setTimeout(() => {
+        animateCount(document.getElementById("t1"), 128400, "$");
+        animateCount(document.getElementById("t2"), 47);
+        animateCount(document.getElementById("t3"), 12800);
+      }, 900);
+    </script>
+  </body>
+</html>
