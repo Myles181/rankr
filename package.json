@@ -1,7 +1,7 @@
 {
-  "name": "mu$ic-fans-backend",
+  "name": "rankr-backend",
   "version": "1.0.0",
-  "description": "Mu$ic-fans backend — Spotify OAuth, leaderboard, pool management",
+  "description": "Rankr backend — Spotify OAuth, leaderboard, pool management",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

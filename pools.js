@@ -1,5 +1,5 @@
 /**
- * Mu$ic-fans — Pool Routes
+ * Rankr — Pool Routes
  * ──────────────────────
  * Manage reward pools created by artists.
  */

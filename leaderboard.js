@@ -1,12 +1,11 @@
 /**
- * Mu$ic-fans — Leaderboard Routes
+ * Rankr — Leaderboard Routes
  * ──────────────────────────────
  * Fetches verified listening time from Spotify,
  * scores fans, and returns live rankings.
  */
 
 const express = require('express');
-const axios   = require('express');
 const axiosLib = require('axios');
 const router  = express.Router();
 
@@ -56,26 +55,22 @@ router.post('/:poolId/sync', requireAuth, async (req, res) => {
 
     const items = resp.data.items || [];
 
-    // Filter tracks by this artist and count valid plays
-    // A valid play = track by this artist, played after pool start
-    // We use duration_ms from track but apply 30-second minimum rule
-    let totalMs = 0;
-    const MIN_PLAY_MS = 30 * 1000; // 30 seconds minimum
+    // Filter tracks by this artist and count valid plays.
+    // Spotify recently-played does not expose actual listen time, only that a
+    // track was played. Using full duration_ms would over-credit partial plays,
+    // so each qualifying play earns a fixed 3-minute credit instead.
+    const CREDIT_PER_PLAY_SECONDS = 180; // 3 minutes
+    const MIN_TRACK_MS = 30 * 1000;      // ignore tracks shorter than 30s
 
+    let newScore = 0;
     items.forEach(item => {
       const track = item.track;
       const isThisArtist = track.artists?.some(a => a.id === artistId);
       if (!isThisArtist) return;
-
-      const duration = track.duration_ms || 0;
-      // Only count if track is long enough to verify (30s minimum)
-      if (duration >= MIN_PLAY_MS) {
-        totalMs += duration;
+      if ((track.duration_ms || 0) >= MIN_TRACK_MS) {
+        newScore += CREDIT_PER_PLAY_SECONDS;
       }
     });
-
-    // Convert to seconds for scoring
-    const newScore = Math.floor(totalMs / 1000);
 
     // Update scores
     if (!scores[poolId]) scores[poolId] = {};

@@ -1,9 +1,9 @@
--- Mu$ic-fans Database Schema
+-- Rankr Database Schema
 -- Run this once to set up your PostgreSQL database
--- Command: psql -U postgres -d mu$ic-fans -f schema.sql
+-- Command: psql -U postgres -d rankr -f schema.sql
 
 -- Create database (run separately if needed)
--- CREATE DATABASE mu$ic-fans;
+-- CREATE DATABASE rankr;
 
 -- ── ARTISTS ──────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS artists (

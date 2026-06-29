@@ -1,5 +1,5 @@
 /**
- * Mu$ic-fans — Spotify OAuth
+ * Rankr — Spotify OAuth
  * ────────────────────────
  * Two separate flows:
  *   /auth/spotify/fan    → Fan login (Premium required)
@@ -126,10 +126,14 @@ async function handleCallback(req, res, redirectUri, role) {
       );
 
       const artists      = searchRes.data.artists?.items || [];
+      // Require an exact name match plus a meaningful follower count (≥100)
+      // to prevent random accounts from self-verifying as artists. Accounts
+      // below the threshold are directed to the manual verification page.
+      const MIN_FOLLOWERS = 100;
       const matchedArtist = artists.find(
         (a) =>
           a.name.toLowerCase() === profile.display_name.toLowerCase() &&
-          a.followers?.total > 0
+          (a.followers?.total ?? 0) >= MIN_FOLLOWERS
       );
 
       // Store artist session (verified flag based on search match)
