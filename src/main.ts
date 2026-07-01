@@ -27,7 +27,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   // Serve HTML files from project root
-  app.use(express.static(join(__dirname, '..', '..')));
+  app.use(express.static(join(__dirname, '..')));
   app.use('/fan/dashboard',    (_req, res) => res.sendFile(join(__dirname, '..', '..', 'fan-dashboard.html')));
   app.use('/artist/dashboard', (_req, res) => res.sendFile(join(__dirname, '..', '..', 'artist-dashboard.html')));
   app.use('/artist/verify',    (_req, res) => res.sendFile(join(__dirname, '..', '..', 'index.html')));
