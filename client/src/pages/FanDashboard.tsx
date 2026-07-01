@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
-const API = 'http://localhost:4000';
+import { useState, useEffect } from 'react';
 
 export default function FanDashboard() {
   const [session, setSession] = useState<any>(null);
@@ -22,7 +19,7 @@ export default function FanDashboard() {
     
   }, []);
 
-  const handleJoinPool = (poolId: number, poolName: string) => {
+  const handleJoinPool = (poolId: number, _poolName: string) => {
     setCurrentPoolId(poolId);
     
     // Mock leaderboard data
@@ -46,7 +43,7 @@ export default function FanDashboard() {
   const handleSync = () => {
     if (!currentPoolId) return alert('Join a pool first to sync listening time.');
     // Mock sync
-    setMyRankInfo(prev => ({
+    setMyRankInfo((prev: typeof myRankInfo) => ({
         ...prev,
         formatted: '3h 15m',
         rank: 2

@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-
-const API = 'http://localhost:4000';
+import { useState, useEffect } from 'react';
 
 export default function ArtistDashboard() {
   const [session, setSession] = useState<any>(null);
