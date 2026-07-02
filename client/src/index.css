@@ -1,4 +1,5 @@
 /* --- Styles from index.html --- */
+@keyframes spin { to { transform: rotate(360deg); } }
 
       :root {
         --black: #050507;
