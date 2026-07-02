@@ -9,7 +9,9 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/artist" element={<ArtistDashboard />} />
+        <Route path="/artist/dashboard" element={<ArtistDashboard />} />
         <Route path="/fan" element={<FanDashboard />} />
+        <Route path="/fan/dashboard" element={<FanDashboard />} />
       </Routes>
     </Router>
   );
