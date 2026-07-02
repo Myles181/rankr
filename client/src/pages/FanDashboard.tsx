@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 
-const API = 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 // --- 3D Tilt Wrapper for Pool Cards ---
 const TiltCard = ({ children }: { children: React.ReactNode }) => {
@@ -57,7 +56,14 @@ export default function FanDashboard() {
   });
 
   useEffect(() => {
-    setSession({ displayName: 'Mock Fan' });
+    if (API_URL) {
+      fetch(`${API_URL}/auth/me`, { credentials: 'include' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => setSession(data))
+        .catch(() => setSession({ displayName: 'Fan' }));
+    } else {
+      setSession({ displayName: 'Mock Fan' });
+    }
 
     setPools([
       { id: 1, title: 'Summer Drop Reward Campaign', artistName: 'Awesome Artist', artistVerified: true, topN: 10, totalReward: 1.5, currency: 'SOL', participants: 450, endsAt: new Date(Date.now() + 86400000 * 12).toISOString(), rewardType: 'Crypto token' },
@@ -166,7 +172,7 @@ export default function FanDashboard() {
         </nav>
         <div className="sb-footer">
           <div className="sb-profile">
-            <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${session?.displayName || 'Fan'}`} className="sb-avatar" alt="Avatar" />
+            <img src={session?.avatar || `https://api.dicebear.com/7.x/pixel-art/svg?seed=${session?.displayName || 'Fan'}`} className="sb-avatar" alt="Avatar" />
             <div>
               <div className="sb-name" id="fanName">{session?.displayName || 'Loading...'}</div>
               <div className="sb-role"><span className="premium-badge">✓ Premium</span></div>
