@@ -22,8 +22,10 @@ function ProtectedRoute({ element }: { element: React.ReactElement }) {
       <div style={{ width: 32, height: 32, border: '2px solid #1e1c22', borderTopColor: '#1db954', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
-  if (status === 'unauth') return React.cloneElement(element as React.ReactElement<{ user?: any }>, { user: null });
-  return React.cloneElement(element as React.ReactElement<{ user?: any }>, { user });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (status === 'unauth') return React.cloneElement(element as any, { user: null });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return React.cloneElement(element as any, { user });
 }
 
 function App() {
@@ -31,10 +33,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/artist" element={<ProtectedRoute element={<ArtistDashboard />} />} />
-        <Route path="/artist/dashboard" element={<ProtectedRoute element={<ArtistDashboard />} />} />
-        <Route path="/fan" element={<ProtectedRoute element={<FanDashboard />} />} />
-        <Route path="/fan/dashboard" element={<ProtectedRoute element={<FanDashboard />} />} />
+        <Route path="/artist" element={<ProtectedRoute element={<ArtistDashboard user={null} />} />} />
+        <Route path="/artist/dashboard" element={<ProtectedRoute element={<ArtistDashboard user={null} />} />} />
+        <Route path="/fan" element={<ProtectedRoute element={<FanDashboard user={null} />} />} />
+        <Route path="/fan/dashboard" element={<ProtectedRoute element={<FanDashboard user={null} />} />} />
       </Routes>
     </Router>
   );
