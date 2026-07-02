@@ -33,10 +33,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/artist" element={<ProtectedRoute element={<ArtistDashboard user={null} />} />} />
-        <Route path="/artist/dashboard" element={<ProtectedRoute element={<ArtistDashboard user={null} />} />} />
-        <Route path="/fan" element={<ProtectedRoute element={<FanDashboard user={null} />} />} />
-        <Route path="/fan/dashboard" element={<ProtectedRoute element={<FanDashboard user={null} />} />} />
+        <Route path="/artist" element={<ProtectedRoute element={<ArtistDashboard />} />} />
+        <Route path="/artist/dashboard" element={<ProtectedRoute element={<ArtistDashboard />} />} />
+        <Route path="/fan" element={<ProtectedRoute element={<FanDashboard />} />} />
+        <Route path="/fan/dashboard" element={<ProtectedRoute element={<FanDashboard />} />} />
       </Routes>
     </Router>
   );
