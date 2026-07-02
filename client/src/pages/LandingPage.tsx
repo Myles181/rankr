@@ -92,6 +92,8 @@ const AppleMusicLogo = () => (
   </svg>
 );
 
+const API_URL = import.meta.env.VITE_API_URL ?? '';
+
 export default function LandingPage() {
   const [isSwapped, setIsSwapped] = useState(false);
   const [showServiceModal, setShowServiceModal] = useState(false);
@@ -218,7 +220,7 @@ export default function LandingPage() {
         </p>
         <div className="hero-ctas">
           <motion.button onClick={() => setShowServiceModal(true)} className="btn-primary" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Start earning as a fan</motion.button>
-          <motion.a href="/auth/spotify/artist" className="btn-outline" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Create a reward pool →</motion.a>
+          <motion.a href={`${API_URL}/auth/spotify/artist`} className="btn-outline" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Create a reward pool →</motion.a>
         </div>
         <div className="hero-ticker">
           <div className="ticker-item">
@@ -529,7 +531,7 @@ export default function LandingPage() {
       <h2>Ready to reward<br />your <em className="shimmer-text">top fans?</em></h2>
       <p>Create your first reward pool in under 5 minutes. Connect your wallet and go live today.</p>
       <div className="cta-btns">
-        <motion.a href="/auth/spotify/artist" className="btn-primary" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Launch as artist</motion.a>
+        <motion.a href={`${API_URL}/auth/spotify/artist`} className="btn-primary" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Launch as artist</motion.a>
         <motion.button onClick={() => setShowServiceModal(true)} className="btn-outline" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>Join as fan</motion.button>
       </div>
     </section>
@@ -604,7 +606,7 @@ export default function LandingPage() {
             <div style={{ display: 'flex', gap: '1rem' }}>
               {/* Spotify — active */}
               <motion.a
-                href="/auth/spotify/fan"
+                href={`${API_URL}/auth/spotify/fan`}
                 whileHover={{ scale: 1.03, borderColor: 'rgba(29,185,84,0.7)' }}
                 whileTap={{ scale: 0.97 }}
                 style={{
