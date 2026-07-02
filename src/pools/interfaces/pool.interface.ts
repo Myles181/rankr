@@ -15,6 +15,9 @@ export interface Pool {
   tiers: { rank: number; amount: number }[];
   walletAddress: string | null;
   contractAddress: string | null;
+  criteriaType: 'first_N' | 'most_played';
+  trackId: string | null;
+  trackName: string | null;
   status: 'active' | 'closed' | 'distributed';
   participants: number;
   createdAt: string;

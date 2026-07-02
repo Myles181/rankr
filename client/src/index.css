@@ -1226,3 +1226,28 @@
   background: linear-gradient(90deg, var(--green), #3ddc84);
   border-radius: 3px;
 }
+
+/* Track search dropdown */
+.track-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: var(--card);
+  border: .5px solid var(--border);
+  border-radius: 6px;
+  z-index: 30;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.track-option {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .625rem 1rem;
+  cursor: pointer;
+  font-size: .875rem;
+  transition: background .15s;
+}
+.track-option:hover { background: rgba(255,255,255,.05); }
+.track-album { color: var(--muted); font-size: .75rem; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }

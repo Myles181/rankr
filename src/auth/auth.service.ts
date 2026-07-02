@@ -8,8 +8,8 @@ const SPOTIFY_AUTH_URL   = 'https://accounts.spotify.com/authorize';
 const SPOTIFY_PROFILE_URL = 'https://api.spotify.com/v1/me';
 const SPOTIFY_SEARCH_URL  = 'https://api.spotify.com/v1/search';
 
-const FAN_SCOPES    = 'user-read-email user-read-private user-read-recently-played';
-const ARTIST_SCOPES = 'user-read-email user-read-private';
+const FAN_SCOPES    = 'user-read-email user-read-private user-read-recently-played user-top-read';
+const ARTIST_SCOPES = 'user-read-email user-read-private user-top-read';
 
 @Injectable()
 export class AuthService {
@@ -98,6 +98,34 @@ export class AuthService {
       accessToken:     access_token,
       refreshToken:    refresh_token,
     };
+  }
+
+  async searchArtistTracks(
+    query: string,
+    accessToken: string,
+    spotifyArtistId: string | null,
+    displayName: string,
+  ): Promise<{ id: string; name: string; albumName: string; albumArt: string | null }[]> {
+    const res = await axios.get(
+      `${SPOTIFY_SEARCH_URL}?q=${encodeURIComponent(query)}&type=track&limit=20`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    const tracks: any[] = res.data.tracks?.items ?? [];
+
+    return tracks
+      .filter(t =>
+        t.artists?.some((a: any) =>
+          spotifyArtistId ? a.id === spotifyArtistId : a.name.toLowerCase() === displayName.toLowerCase(),
+        ),
+      )
+      .slice(0, 10)
+      .map(t => ({
+        id:        t.id,
+        name:      t.name,
+        albumName: t.album?.name ?? '',
+        albumArt:  t.album?.images?.[1]?.url ?? null,
+      }));
   }
 
   get frontendBaseUrl(): string {

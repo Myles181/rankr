@@ -26,6 +26,11 @@ export class PoolsController {
     return this.poolsService.findOne(id);
   }
 
+  @Get(':id/leaderboard')
+  leaderboard(@Param('id', ParseIntPipe) id: number) {
+    return this.poolsService.leaderboard(id);
+  }
+
   @Post()
   @UseGuards(ArtistGuard)
   create(@Body() dto: CreatePoolDto, @Req() req: Request) {
@@ -34,8 +39,14 @@ export class PoolsController {
 
   @Post(':id/join')
   @UseGuards(FanGuard)
-  join(@Param('id', ParseIntPipe) id: number) {
-    return this.poolsService.join(id);
+  join(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.poolsService.join(id, req.session.user);
+  }
+
+  @Post(':id/sync')
+  @UseGuards(FanGuard)
+  sync(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    return this.poolsService.sync(id, req.session.user);
   }
 
   @Post(':id/close')

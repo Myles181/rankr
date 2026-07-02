@@ -47,4 +47,16 @@ export class CreatePoolDto {
   @IsString()
   @IsOptional()
   contractAddress?: string;
+
+  @IsOptional()
+  @IsIn(['first_N', 'most_played'])
+  criteriaType?: string;
+
+  @IsOptional()
+  @IsString()
+  trackId?: string;
+
+  @IsOptional()
+  @IsString()
+  trackName?: string;
 }

@@ -59,71 +59,61 @@ export default function FanDashboard() {
     if (API_URL) {
       fetch(`${API_URL}/auth/me`, { credentials: 'include' })
         .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => setSession(data))
+        .then(setSession)
         .catch(() => setSession({ displayName: 'Fan' }));
+
+      fetch(`${API_URL}/pools`, { credentials: 'include' })
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(setPools)
+        .catch(() => {});
     } else {
       setSession({ displayName: 'Mock Fan' });
+      setPools([
+        { id: 1, title: 'Summer Drop Reward Campaign', artistName: 'Awesome Artist', artistVerified: true, topN: 10, totalReward: 1.5, currency: 'SOL', participants: 450, endsAt: new Date(Date.now() + 86400000 * 12).toISOString(), rewardType: 'Crypto token', trackName: 'HUMBLE.', criteriaType: 'most_played' },
+        { id: 2, title: 'Early Access NFT Giveaway', artistName: 'Cool Band', artistVerified: false, topN: 50, totalReward: 50, currency: 'NFTs', participants: 1200, endsAt: new Date(Date.now() + 86400000 * 5).toISOString(), rewardType: 'NFT', trackName: 'DNA.', criteriaType: 'first_N' },
+      ]);
     }
-
-    setPools([
-      { id: 1, title: 'Summer Drop Reward Campaign', artistName: 'Awesome Artist', artistVerified: true, topN: 10, totalReward: 1.5, currency: 'SOL', participants: 450, endsAt: new Date(Date.now() + 86400000 * 12).toISOString(), rewardType: 'Crypto token' },
-      { id: 2, title: 'Early Access NFT Giveaway', artistName: 'Cool Band', artistVerified: false, topN: 50, totalReward: 50, currency: 'NFTs', participants: 1200, endsAt: new Date(Date.now() + 86400000 * 5).toISOString(), rewardType: 'NFT' }
-    ]);
   }, []);
 
-  const handleJoinPool = (poolId: number, poolName: string) => {
+  const handleJoinPool = async (poolId: number, _poolName: string) => {
     setCurrentPoolId(poolId);
-    
-    // Initial Mock Rankings
-    const mockRankings = Array.from({ length: 10 }).map((_, i) => ({
-      id: i + 1,
-      rank: i + 1,
-      displayName: `Fan ${i + 1}`,
-      score: 10000 - (i * 500)
-    }));
-    
-    // Make me rank 4
-    mockRankings[3].displayName = session?.displayName || 'Mock Fan';
-    mockRankings[3].id = 999; // my special ID
-    
-    setLeaderboard(mockRankings);
-    setMyRankInfo({
-      rank: 4,
-      totalFans: 450,
-      totalSeconds: 8500,
-      xpRequired: 9000 // score needed for rank 3
-    });
+
+    if (API_URL) {
+      await fetch(`${API_URL}/pools/${poolId}/join`, { method: 'POST', credentials: 'include' }).catch(() => {});
+      const lb = await fetch(`${API_URL}/pools/${poolId}/leaderboard`, { credentials: 'include' })
+        .then(r => r.ok ? r.json() : []).catch(() => []);
+      setLeaderboard(lb);
+      const me = lb.find((e: any) => e.fanSpotifyId === session?.spotifyId);
+      if (me) setMyRankInfo({ rank: me.rank, totalFans: lb.length, totalSeconds: me.score, xpRequired: lb[me.rank - 2]?.score ?? me.score + 10 });
+    } else {
+      const mockRankings = Array.from({ length: 10 }).map((_, i) => ({ fanSpotifyId: `fan${i}`, rank: i + 1, fanName: `Fan ${i + 1}`, score: 10000 - (i * 500) }));
+      mockRankings[3].fanName = session?.displayName || 'Mock Fan';
+      setLeaderboard(mockRankings);
+      setMyRankInfo({ rank: 4, totalFans: 450, totalSeconds: 8500, xpRequired: 9000 });
+    }
   };
 
-  const handleSyncComplete = () => {
+  const handleSyncComplete = async () => {
     if (!currentPoolId) return alert('Join a pool first to sync listening time.');
-    
-    // Boost score and re-sort to trigger Overtake animation
-    const newScore = myRankInfo.totalSeconds + 1200; // Add 20 minutes
-    
-    let updatedLb = leaderboard.map(fan => {
-      if (fan.id === 999) return { ...fan, score: newScore };
-      return fan;
-    });
 
-    updatedLb.sort((a, b) => b.score - a.score);
-    
-    // Update ranks
-    let myNewRank = myRankInfo.rank;
-    updatedLb = updatedLb.map((fan, i) => {
-      fan.rank = i + 1;
-      if (fan.id === 999) myNewRank = fan.rank;
-      return fan;
-    });
-
-    setLeaderboard([...updatedLb]); // Create new array ref to force layout animation
-
-    setMyRankInfo((prev: any) => ({
-      ...prev,
-      totalSeconds: newScore,
-      rank: myNewRank,
-      xpRequired: updatedLb[myNewRank - 2]?.score || newScore + 5000 // Next target
-    }));
+    if (API_URL) {
+      const result = await fetch(`${API_URL}/pools/${currentPoolId}/sync`, { method: 'POST', credentials: 'include' })
+        .then(r => r.ok ? r.json() : null).catch(() => null);
+      if (result) {
+        setMyRankInfo((prev: any) => ({ ...prev, rank: result.rank, totalSeconds: result.score, xpRequired: 50 }));
+        const lb = await fetch(`${API_URL}/pools/${currentPoolId}/leaderboard`, { credentials: 'include' })
+          .then(r => r.ok ? r.json() : []).catch(() => []);
+        setLeaderboard(lb);
+      }
+    } else {
+      const newScore = myRankInfo.totalSeconds + 1200;
+      let updatedLb = leaderboard.map((fan: any) => fan.fanName === session?.displayName ? { ...fan, score: newScore } : fan);
+      updatedLb.sort((a: any, b: any) => b.score - a.score);
+      let myNewRank = myRankInfo.rank;
+      updatedLb = updatedLb.map((fan: any, i: number) => { const r = { ...fan, rank: i + 1 }; if (fan.fanName === session?.displayName) myNewRank = r.rank; return r; });
+      setLeaderboard([...updatedLb]);
+      setMyRankInfo((prev: any) => ({ ...prev, totalSeconds: newScore, rank: myNewRank, xpRequired: updatedLb[myNewRank - 2]?.score || newScore + 5000 }));
+    }
   };
 
   // --- Hold-to-Sync Logic ---
@@ -296,31 +286,26 @@ export default function FanDashboard() {
               ) : (
                 leaderboard.map((fan) => {
                   const maxScore = leaderboard[0]?.score || 1;
-                  const isMe = fan.id === 999;
+                  const isMe = fan.fanSpotifyId === session?.spotifyId || fan.fanName === session?.displayName;
                   const barPct = Math.round((fan.score / maxScore) * 100);
 
                   return (
-                    // motion.div layout enables automatic sliding animations when the array order changes
-                    <motion.div 
+                    <motion.div
                       layout
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      className={`lb-row ${isMe ? 'is-me' : ''}`} 
-                      key={fan.id}
+                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      className={`lb-row ${isMe ? 'is-me' : ''}`}
+                      key={fan.fanSpotifyId ?? fan.fanName}
                     >
                       <div className="lb-rank">{fan.rank}</div>
                       <div className="lb-name">
-                        {fan.displayName}
+                        {fan.fanName}
                         {isMe && <span className="lb-you">YOU</span>}
                       </div>
-                      <div className="lb-time">{formatTime(fan.score)}</div>
+                      <div className="lb-time">Score: {fan.score}</div>
                       <div className="lb-bar-wrap">
-                        <motion.div 
-                          className="lb-bar" 
-                          animate={{ width: `${barPct}%` }}
-                          transition={{ duration: 0.8 }}
-                        />
+                        <motion.div className="lb-bar" animate={{ width: `${barPct}%` }} transition={{ duration: 0.8 }} />
                       </div>
                     </motion.div>
                   );

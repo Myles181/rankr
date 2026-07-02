@@ -2,6 +2,7 @@ import { Controller, Get, Post, Query, Req, Res, UseGuards, UnauthorizedExceptio
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../common/guards/auth.guard';
+import { ArtistGuard } from '../common/guards/artist.guard';
 import '../common/types/session.types';
 
 @Controller('auth')
@@ -54,6 +55,14 @@ export class AuthController {
     } catch (err) {
       return res.redirect(`${this.authService.frontendBaseUrl}/auth-error?msg=server_error`);
     }
+  }
+
+  @Get('spotify/tracks/search')
+  @UseGuards(ArtistGuard)
+  searchTracks(@Query('q') q: string, @Req() req: Request) {
+    if (!q || q.trim().length < 2) return [];
+    const { accessToken, spotifyArtistId, displayName } = req.session.user;
+    return this.authService.searchArtistTracks(q, accessToken, spotifyArtistId ?? null, displayName);
   }
 
   @Get('me')
