@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function ArtistDashboard() {
+export default function ArtistDashboard({ user: _user }: { user?: any } = {}) {
   const [session, setSession] = useState<any>(null);
   const [pools, setPools] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);

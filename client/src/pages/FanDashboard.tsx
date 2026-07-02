@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function FanDashboard({ user }: { user: any }) {
+export default function FanDashboard({ user }: { user?: any }) {
   const [pools] = useState<any[]>([
     { id: 1, title: 'Summer Drop Reward Campaign', artistName: 'Awesome Artist', artistVerified: true, topN: 10, totalReward: 1.5, currency: 'SOL', participants: 450, endsAt: new Date(Date.now() + 86400000 * 12).toISOString(), rewardType: 'Crypto token' },
     { id: 2, title: 'Early Access NFT Giveaway', artistName: 'Cool Band', artistVerified: false, topN: 50, totalReward: 50, currency: 'NFTs', participants: 1200, endsAt: new Date(Date.now() + 86400000 * 5).toISOString(), rewardType: 'NFT' }
@@ -67,7 +67,7 @@ export default function FanDashboard({ user }: { user: any }) {
           <div className="sb-profile">
             <img src={`https://api.dicebear.com/7.x/pixel-art/svg?seed=${user?.displayName || 'Fan'}`} className="sb-avatar" alt="Avatar" />
             <div>
-              <div className="sb-name" id="fanName">{session?.displayName || 'Loading...'}</div>
+              <div className="sb-name" id="fanName">{user?.displayName || 'Loading...'}</div>
               <div className="sb-role"><span className="premium-badge">✓ Premium</span></div>
             </div>
           </div>

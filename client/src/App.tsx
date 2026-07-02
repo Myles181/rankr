@@ -22,8 +22,8 @@ function ProtectedRoute({ element }: { element: React.ReactElement }) {
       <div style={{ width: 32, height: 32, border: '2px solid #1e1c22', borderTopColor: '#1db954', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
-  if (status === 'unauth') return <Navigate to="/" replace />;
-  return React.cloneElement(element, { user });
+  if (status === 'unauth') return React.cloneElement(element as React.ReactElement<{ user?: any }>, { user: null });
+  return React.cloneElement(element as React.ReactElement<{ user?: any }>, { user });
 }
 
 function App() {
