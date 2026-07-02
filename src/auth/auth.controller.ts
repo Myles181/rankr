@@ -59,10 +59,19 @@ export class AuthController {
 
   @Get('spotify/tracks/search')
   @UseGuards(ArtistGuard)
-  searchTracks(@Query('q') q: string, @Req() req: Request) {
+  async searchTracks(@Query('q') q: string, @Req() req: Request) {
     if (!q || q.trim().length < 2) return [];
-    const { accessToken, spotifyArtistId, displayName } = req.session.user;
-    return this.authService.searchArtistTracks(q, accessToken, spotifyArtistId ?? null, displayName);
+    const { spotifyArtistId, displayName } = req.session.user;
+    const search = (token: string) =>
+      this.authService.searchArtistTracks(q, token, spotifyArtistId ?? null, displayName);
+    try {
+      return await search(req.session.user.accessToken);
+    } catch (err: any) {
+      if (err.response?.status !== 401) throw err;
+      const newToken = await this.authService.refreshAccessToken(req.session.user.refreshToken);
+      req.session.user.accessToken = newToken;
+      return search(newToken);
+    }
   }
 
   @Get('me')

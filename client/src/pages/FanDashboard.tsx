@@ -271,12 +271,28 @@ export default function FanDashboard() {
           </div>
 
           <div className="section-title">
-            The Battlefield — <span id="lbPoolName" style={{ color: 'var(--gold)' }}>{currentPoolId ? pools.find(p=>p.id===currentPoolId)?.title : 'select a campaign'}</span>
+            The Battlefield — <span style={{ color: 'var(--gold)' }}>{currentPoolId ? pools.find(p => p.id === currentPoolId)?.title : 'select a campaign'}</span>
           </div>
+
+          {/* Winner banner for closed pools */}
+          {currentPoolId && pools.find(p => p.id === currentPoolId)?.status === 'closed' && pools.find(p => p.id === currentPoolId)?.winners?.length > 0 && (
+            <div style={{ background: 'rgba(200,168,75,.08)', border: '.5px solid var(--gold)', borderRadius: 8, padding: '1.25rem 1.5rem', marginBottom: '1rem' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', color: 'var(--gold)', marginBottom: '.75rem', letterSpacing: '.04em' }}>🏆 Final Winners</div>
+              {pools.find(p => p.id === currentPoolId)!.winners!.map((w: any) => (
+                <div key={w.fanSpotifyId} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', padding: '.4rem 0', borderBottom: '.5px solid rgba(200,168,75,.12)' }}>
+                  <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--gold)', width: 24, textAlign: 'center' }}>#{w.rank}</span>
+                  {w.fanAvatar && <img src={w.fanAvatar} style={{ width: 28, height: 28, borderRadius: '50%' }} alt="" />}
+                  <span style={{ flex: 1 }}>{w.fanName}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '.75rem', color: 'var(--muted)' }}>score {w.score}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="lb-card">
             <div className="lb-header">
               <span className="lb-title">Rankings</span>
-              <span className="live-dot">Live</span>
+              <span className="live-dot">{pools.find(p => p.id === currentPoolId)?.status === 'closed' ? 'Final' : 'Live'}</span>
             </div>
             <div id="leaderboard" style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
               {leaderboard.length === 0 ? (

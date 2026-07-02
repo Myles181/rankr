@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Pool } from './interfaces/pool.interface';
 import { CreatePoolDto } from './dto/create-pool.dto';
 import { SessionUser } from '../common/types/session.types';
+import { AuthService } from '../auth/auth.service';
 
 export interface PoolEntry {
   fanSpotifyId: string;
@@ -13,11 +14,15 @@ export interface PoolEntry {
   syncedAt: string;
 }
 
+const TOP_TRACKS_URL = 'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=50';
+
 @Injectable()
 export class PoolsService {
   private pools: Pool[] = [];
   private idCounter = 1;
   private entries: Map<number, PoolEntry[]> = new Map();
+
+  constructor(private readonly authService: AuthService) {}
 
   findAllActive(): Pool[] {
     const now = new Date();
@@ -92,7 +97,7 @@ export class PoolsService {
     return { pool, alreadyJoined };
   }
 
-  async sync(id: number, fan: SessionUser): Promise<PoolEntry & { poolTitle: string }> {
+  async sync(id: number, fan: SessionUser): Promise<PoolEntry & { poolTitle: string; newAccessToken?: string }> {
     const pool = this.findOne(id);
     if (pool.status !== 'active') throw new BadRequestException('Pool is not active');
 
@@ -112,20 +117,26 @@ export class PoolsService {
       pool.participants += 1;
     }
 
-    // Fetch fan's top tracks from Spotify
-    const res = await axios.get(
-      'https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=50',
-      { headers: { Authorization: `Bearer ${fan.accessToken}` } },
-    );
+    // Fetch top tracks, refreshing access token on 401
+    let newAccessToken: string | undefined;
+    const fetchTopTracks = (token: string) =>
+      axios.get(TOP_TRACKS_URL, { headers: { Authorization: `Bearer ${token}` } });
+
+    let res: any;
+    try {
+      res = await fetchTopTracks(fan.accessToken);
+    } catch (err: any) {
+      if (err.response?.status !== 401) throw err;
+      newAccessToken = await this.authService.refreshAccessToken(fan.refreshToken);
+      res = await fetchTopTracks(newAccessToken);
+    }
 
     const topTracks: any[] = res.data.items ?? [];
 
     if (pool.trackId) {
-      // Score based on rank position: track at index 0 = 50pts, index 49 = 1pt, not present = 0
       const idx = topTracks.findIndex(t => t.id === pool.trackId);
       entry.score = idx >= 0 ? 50 - idx : 0;
     } else {
-      // No track specified — score by total listen count proxy (position in general top tracks)
       const artistTracks = topTracks.filter(t =>
         t.artists?.some((a: any) => a.name.toLowerCase() === pool.artistName.toLowerCase()),
       );
@@ -134,12 +145,11 @@ export class PoolsService {
 
     entry.syncedAt = new Date().toISOString();
 
-    // Re-rank everyone
     poolEntries.sort((a, b) => b.score - a.score);
     poolEntries.forEach((e, i) => { e.rank = i + 1; });
     this.entries.set(id, poolEntries);
 
-    return { ...entry, poolTitle: pool.title };
+    return { ...entry, poolTitle: pool.title, ...(newAccessToken ? { newAccessToken } : {}) };
   }
 
   leaderboard(id: number): PoolEntry[] {
@@ -150,7 +160,8 @@ export class PoolsService {
   close(id: number, artistSpotifyId: string): Pool {
     const pool = this.pools.find(p => p.id === id && p.artistSpotifyId === artistSpotifyId);
     if (!pool) throw new NotFoundException('Pool not found or not yours');
-    pool.status = 'closed';
+    pool.status  = 'closed';
+    pool.winners = this.leaderboard(id).slice(0, pool.topN);
     return pool;
   }
 }

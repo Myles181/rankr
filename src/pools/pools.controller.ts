@@ -45,8 +45,13 @@ export class PoolsController {
 
   @Post(':id/sync')
   @UseGuards(FanGuard)
-  sync(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    return this.poolsService.sync(id, req.session.user);
+  async sync(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
+    const result = await this.poolsService.sync(id, req.session.user);
+    if (result.newAccessToken) {
+      req.session.user.accessToken = result.newAccessToken;
+    }
+    const { newAccessToken: _, ...entry } = result;
+    return entry;
   }
 
   @Post(':id/close')

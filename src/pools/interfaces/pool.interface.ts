@@ -22,4 +22,5 @@ export interface Pool {
   participants: number;
   createdAt: string;
   endsAt: string;
+  winners?: import('../pools.service').PoolEntry[];
 }

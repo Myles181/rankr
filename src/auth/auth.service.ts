@@ -100,6 +100,16 @@ export class AuthService {
     };
   }
 
+  async refreshAccessToken(refreshToken: string): Promise<string> {
+    const basicAuth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+    const res = await axios.post(
+      SPOTIFY_TOKEN_URL,
+      new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refreshToken }).toString(),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: `Basic ${basicAuth}` } },
+    );
+    return res.data.access_token;
+  }
+
   async searchArtistTracks(
     query: string,
     accessToken: string,

@@ -68,6 +68,19 @@ export default function ArtistDashboard() {
     setTrackResults([]);
   };
 
+  const handleClosePool = async (poolId: number) => {
+    if (!confirm('Close this pool and finalise winners?')) return;
+    if (!API_URL) {
+      setPools(p => p.map(pool => pool.id === poolId ? { ...pool, status: 'closed' } : pool));
+      return;
+    }
+    const res = await fetch(`${API_URL}/pools/${poolId}/close`, { method: 'POST', credentials: 'include' });
+    if (res.ok) {
+      const updated = await res.json();
+      setPools(p => p.map(pool => pool.id === poolId ? updated : pool));
+    }
+  };
+
   const handleCreatePool = async () => {
     if (!API_URL) {
       const newPool = { id: Math.random(), title: formData.title || 'New Pool', topN: Number(formData.topN) || 10, totalReward: Number(formData.totalReward) || 0, currency: 'SOL', participants: 0, endsAt: new Date(Date.now() + 86400000 * (Number(formData.durationDays) || 30)).toISOString(), status: 'active', trackName: formData.trackName, criteriaType: formData.criteriaType };
@@ -165,7 +178,16 @@ export default function ArtistDashboard() {
                     <div className="pool-val">{pool.totalReward} {pool.currency}</div>
                     <div className="pool-val">{pool.participants}</div>
                     <div className="pool-val">{daysLeft > 0 ? `${daysLeft}d` : 'Ended'}</div>
-                    <div style={{ textAlign: 'right' }}><span className="status-badge status-active">Live</span></div>
+                    <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '.5rem', justifyContent: 'flex-end' }}>
+                      {pool.status === 'active' ? (
+                        <>
+                          <span className="status-badge status-active">Live</span>
+                          <button className="btn btn-outline" style={{ fontSize: '.75rem', padding: '.25rem .75rem' }} onClick={() => handleClosePool(pool.id)}>Close</button>
+                        </>
+                      ) : (
+                        <span className="status-badge" style={{ background: 'rgba(122,120,112,.15)', color: 'var(--muted)' }}>Closed</span>
+                      )}
+                    </div>
                   </div>
                 );
               })
